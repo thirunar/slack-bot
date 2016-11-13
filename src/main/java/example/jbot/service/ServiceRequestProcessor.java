@@ -33,11 +33,13 @@ public class ServiceRequestProcessor {
         String url = getUrlForEnvironment(inputs[inputs.length - 2]);
         if (request.contains("internal")) {
             return format("{0}sfm/internal/serviceRequest/{1}", url, inputs[inputs.length - 1]);
-        } else
-            return MessageFormat.format("{0}sfm/serviceRequest/{1}", url, inputs[inputs.length - 1]);
+        } else if (request.contains("livenodes")) {
+            return MessageFormat.format("{0}sm/admin/livenodes", url, inputs[inputs.length - 1]);
+        }
+        return MessageFormat.format("{0}sfm/serviceRequest/{1}", url, inputs[inputs.length - 1]);
     }
 
-    HttpHeaders createHeaders(final String username, final String password) {
+    private HttpHeaders createHeaders(final String username, final String password) {
         return new HttpHeaders() {
             {
                 String auth = username + ":" + password;
@@ -45,7 +47,6 @@ public class ServiceRequestProcessor {
                         auth.getBytes(Charset.forName("US-ASCII")));
                 String authHeader = "Basic " + new String(encodedAuth);
                 set("Authorization", authHeader);
-                setAccept(asList(MediaType.APPLICATION_XML));
             }
         };
     }

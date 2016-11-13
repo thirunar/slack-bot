@@ -1,5 +1,7 @@
 package example.jbot.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
@@ -15,6 +17,7 @@ import java.io.StringWriter;
 import java.text.MessageFormat;
 
 public class PrettyPrinter {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PrettyPrinter.class);
 
     public static String formatXML(String input) {
         try {
