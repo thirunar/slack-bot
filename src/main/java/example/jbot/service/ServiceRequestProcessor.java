@@ -4,15 +4,15 @@ import example.jbot.util.PrettyPrinter;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.client.RestTemplate;
 
 import java.nio.charset.Charset;
 import java.text.MessageFormat;
+import java.util.Arrays;
 
 import static example.jbot.model.Environments.getEnvironmentNames;
 import static example.jbot.model.Environments.getUrlForEnvironment;
@@ -23,24 +23,38 @@ public class ServiceRequestProcessor {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceRequestProcessor.class);
 
     public String processRequest(String request) {
-        HttpEntity entity = new HttpEntity(createHeaders("admin", "secret"));
         RestTemplate restTemplate = new RestTemplate();
-        String serviceRequest = getUrl(request);
-        if (serviceRequest != null) {
-            LOGGER.info("Service request url: {}", serviceRequest);
-            ResponseEntity<String> response = restTemplate.exchange(serviceRequest, HttpMethod.GET, entity, String.class);
-            return PrettyPrinter.formatXML(response.getBody());
+        HttpHeaders headers = createHeaders("admin", "secret");
+        String url = getUrl(request);
+        if (url != null) {
+            if (request.contains("livenodes")) {
+                HttpEntity entity = new HttpEntity(headers);
+                ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+                return response.getBody();
+            } else {
+                headers.setAccept(Arrays.asList(MediaType.APPLICATION_XML));
+                HttpEntity entity = new HttpEntity(headers);
+                ResponseEntity<String> response = null;
+                try {
+                    response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+                    return PrettyPrinter.formatXML(response.getBody());
+                } catch (Exception e) {
+                    return "Sorry!! Error processing the request!!!";
+                }
+            }
         }
-        return "Please enter valid input. \"<env> <serviceRequestId>\" or \"internal <env> <serviceRequestId>\" or <env> livenodes";
+        return "Please enter valid input. \"<env> <serviceRequestId>\" or \"internal <env> <serviceRequestId>\" or \"<env> livenodes\"";
+
     }
+
 
     private String getUrl(String request) {
         String[] inputs = request.split(" ");
         String url = getUrlForEnvironment(inputs[inputs.length - 2]);
-        if (request.contains("internal")) {
+        if (request.contains("livenodes")) {
+            return format("{0}sm/admin/livenodes", url);
+        } else if (request.contains("internal")) {
             return format("{0}sfm/internal/serviceRequest/{1}", url, inputs[inputs.length - 1]);
-        } else if (request.contains("livenodes")) {
-            return MessageFormat.format("{0}sm/admin/livenodes", url, inputs[inputs.length - 1]);
         } else if (getEnvironmentNames().contains(inputs[inputs.length - 2]) && inputs.length == 2) {
             return MessageFormat.format("{0}sfm/serviceRequest/{1}", url, inputs[inputs.length - 1]);
         }
