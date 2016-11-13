@@ -14,6 +14,7 @@ import org.springframework.web.client.RestTemplate;
 import java.nio.charset.Charset;
 import java.text.MessageFormat;
 
+import static example.jbot.model.Environments.getEnvironmentNames;
 import static example.jbot.model.Environments.getUrlForEnvironment;
 import static java.text.MessageFormat.format;
 
@@ -40,7 +41,7 @@ public class ServiceRequestProcessor {
             return format("{0}sfm/internal/serviceRequest/{1}", url, inputs[inputs.length - 1]);
         } else if (request.contains("livenodes")) {
             return MessageFormat.format("{0}sm/admin/livenodes", url, inputs[inputs.length - 1]);
-        } else if (request.contains("serviceRequest")) {
+        } else if (getEnvironmentNames().contains(inputs[inputs.length - 2]) && inputs.length == 2) {
             return MessageFormat.format("{0}sfm/serviceRequest/{1}", url, inputs[inputs.length - 1]);
         }
         return null;

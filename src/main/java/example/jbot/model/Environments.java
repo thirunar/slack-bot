@@ -2,6 +2,7 @@ package example.jbot.model;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class Environments {
 
@@ -19,5 +20,9 @@ public class Environments {
 
     public static String getUrlForEnvironment(String environment) {
         return environments.get(environment);
+    }
+
+    public static Set<String> getEnvironmentNames() {
+        return environments.keySet();
     }
 }
