@@ -5,10 +5,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
-@RestController
+@RestController("/")
 public class HealthController {
 
-    @RequestMapping(value = "health", method = GET, produces = "application/json")
+    @RequestMapping(value = "", method = GET, produces = "application/json")
     public String health() {
         return "UP";
     }
