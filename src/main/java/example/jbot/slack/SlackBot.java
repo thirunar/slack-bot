@@ -1,5 +1,6 @@
 package example.jbot.slack;
 
+import com.google.common.base.Splitter;
 import example.jbot.service.ServiceRequestProcessor;
 import me.ramswaroop.jbot.core.slack.Bot;
 import me.ramswaroop.jbot.core.slack.Controller;
@@ -15,6 +16,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.socket.WebSocketSession;
 
 import static example.jbot.util.PrettyPrinter.formatCode;
+import static example.jbot.util.PrettyPrinter.formatXML;
 
 @Component
 public class SlackBot extends Bot {
@@ -40,10 +42,15 @@ public class SlackBot extends Bot {
     }
 
     @Controller(events = {EventType.DIRECT_MENTION, EventType.DIRECT_MESSAGE})
-    public void onReceiveDM(WebSocketSession session, Event event) {
+    public void onReceiveDM(final WebSocketSession session, final Event event) {
         LOGGER.info("Received: {}", event.getText());
+
         String response = requestProcessor.processRequest(event.getText());
-        reply(session, event, new Message(formatCode(response)));
+        Iterable<String> splittedStrings = Splitter.fixedLength(4000).split(response);
+
+        for (String splittedString : splittedStrings) {
+            reply(session, event, new Message(formatCode(splittedString)));
+        }
         stopConversation(event);
     }
 

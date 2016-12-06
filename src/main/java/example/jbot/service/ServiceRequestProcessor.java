@@ -5,18 +5,16 @@ import org.apache.tomcat.util.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.client.RestTemplate;
 
 import java.nio.charset.Charset;
 import java.text.MessageFormat;
-import java.util.Arrays;
 
 import static example.jbot.model.Environments.getEnvironmentNames;
 import static example.jbot.model.Environments.getUrlForEnvironment;
 import static java.text.MessageFormat.format;
+import static java.util.Arrays.asList;
 
 @Service
 public class ServiceRequestProcessor {
@@ -24,7 +22,7 @@ public class ServiceRequestProcessor {
 
     public String processRequest(String request) {
         RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = createHeaders("admin", "secret");
+        HttpHeaders headers = createHeaders("admin", "xyz");
         String url = getUrl(request);
         if (url != null) {
             if (request.contains("livenodes")) {
@@ -32,18 +30,17 @@ public class ServiceRequestProcessor {
                 ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
                 return response.getBody();
             } else {
-                headers.setAccept(Arrays.asList(MediaType.APPLICATION_XML));
+                headers.setAccept(asList(MediaType.APPLICATION_XML));
                 HttpEntity entity = new HttpEntity(headers);
-                ResponseEntity<String> response = null;
                 try {
-                    response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+                    ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
                     return PrettyPrinter.formatXML(response.getBody());
                 } catch (Exception e) {
                     return "Sorry!! Error processing the request!!!";
                 }
             }
         }
-        return "Please enter valid input. \"<env> <serviceRequestId>\" or \"internal <env> <serviceRequestId>\" or \"<env> livenodes\"";
+        return "";
 
     }
 
