@@ -15,6 +15,7 @@ import static example.jbot.model.Environments.getEnvironmentNames;
 import static example.jbot.model.Environments.getUrlForEnvironment;
 import static java.text.MessageFormat.format;
 import static java.util.Arrays.asList;
+import static java.util.Arrays.equals;
 
 @Service
 public class ServiceRequestProcessor {
@@ -22,13 +23,17 @@ public class ServiceRequestProcessor {
 
     public String processRequest(String request) {
         RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = createHeaders("admin", "xyz");
+        HttpHeaders headers = createHeaders("admin", "secret");
         String url = getUrl(request);
         if (url != null) {
             if (request.contains("livenodes")) {
                 HttpEntity entity = new HttpEntity(headers);
                 ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
                 return response.getBody();
+            } else if (request.contains("refresh")) {
+                HttpEntity entity = new HttpEntity(headers);
+                ResponseEntity response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+                return response.getStatusCode().name();
             } else {
                 headers.setAccept(asList(MediaType.APPLICATION_XML));
                 HttpEntity entity = new HttpEntity(headers);
@@ -49,11 +54,13 @@ public class ServiceRequestProcessor {
         String[] inputs = request.split(" ");
         String url = getUrlForEnvironment(inputs[inputs.length - 2]);
         if (request.contains("livenodes")) {
-            return format("{0}sm/admin/livenodes", url);
+            return format("{0}livenodes", url);
         } else if (request.contains("internal")) {
-            return format("{0}sfm/internal/serviceRequest/{1}", url, inputs[inputs.length - 1]);
+            return format("{0}/serviceRequest/{1}", url, inputs[inputs.length - 1]);
+        } else if (request.contains("refresh")) {
+            return format("{0}bus/refresh", url);
         } else if (getEnvironmentNames().contains(inputs[inputs.length - 2]) && inputs.length == 2) {
-            return MessageFormat.format("{0}sfm/serviceRequest/{1}", url, inputs[inputs.length - 1]);
+            return MessageFormat.format("{0}/{1}", url, inputs[inputs.length - 1]);
         }
         return null;
     }

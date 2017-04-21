@@ -9,13 +9,13 @@ public class Environments {
     private static Map<String, String> environments = new HashMap();
 
     static {
-        environments.put("demo", "http://52.36.28.37/");
-        environments.put("perf1", "http://52.42.141.41/");
-        environments.put("perf2", "http://35.161.210.211/");
-        environments.put("reg1", "http://52.89.111.6/");
-        environments.put("reg2", "http://52.89.211.248/");
-        environments.put("qa1", "http://52.34.132.141/");
-        environments.put("staging", "http://35.161.219.222/");
+        environments.put("demo", "http://xyz/");
+        environments.put("perf1", "http://xyz/");
+        environments.put("perf2", "http://xyz/");
+        environments.put("reg1", "http://xyz/");
+        environments.put("reg2", "http://xyz/");
+        environments.put("qa1", "http://xyz/");
+        environments.put("staging", "http://xyz/");
     }
 
     public static String getUrlForEnvironment(String environment) {
